@@ -1,5 +1,7 @@
 package com.arogya.flow.entity;
 
+import com.arogya.flow.entity.enums.TokenSource;
+import com.arogya.flow.entity.enums.TokenStatus;
 import jakarta.persistence.*;
 import lombok.*;
 
