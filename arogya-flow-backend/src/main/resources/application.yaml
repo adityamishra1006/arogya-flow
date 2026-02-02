@@ -1,6 +1,15 @@
+server:
+  port: 8080
+
 spring:
   application:
     name: arogya-flow-backend
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/arogyaflow
+    username: postgres
+    password: "#@Ditya06"
+    driver-class-name: org.postgresql.Driver
 
   jpa:
     hibernate:
@@ -9,6 +18,4 @@ spring:
     properties:
       hibernate:
         format_sql: true
-
-server:
-  port: 8089
+        dialect: org.hibernate.dialect.PostgreSQLDialect
