@@ -1,5 +1,6 @@
 package com.arogya.flow.entity;
 
+import com.arogya.flow.entity.enums.SlotStatus;
 import jakarta.persistence.*;
 import lombok.*;
 
