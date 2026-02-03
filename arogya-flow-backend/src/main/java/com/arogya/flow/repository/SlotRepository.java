@@ -13,7 +13,20 @@ import java.util.List;
 
 @Repository
 public interface SlotRepository extends JpaRepository<Slot, Long> {
-    List<Slot> findByDoctorIdAndSlotDate(Long doctorId, LocalDate slotDate);
-    List<Slot> findByDoctorIdAndSlotDateAndStatus(Long doctorId, LocalDate slotDate, SlotStatus status);
+    List<Slot> findByDoctorIdAndSlotDateOrderByStartTime(
+            Long doctorId,
+            LocalDate slotDate
+    );
+
+    List<Slot> findByStatusAndSlotDateAndEndTimeBefore(
+            SlotStatus status,
+            LocalDate date,
+            LocalTime time
+    );
+
+    List<Slot> findByStatusAndSlotDateBefore(
+            SlotStatus status,
+            LocalDate date
+    );
     boolean existsByDoctorIdAndSlotDateAndStartTimeLessThanAndEndTimeGreaterThan(Long doctorId, LocalDate slotDate, LocalTime endTime, LocalTime startTime);
 }
