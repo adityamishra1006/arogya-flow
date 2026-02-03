@@ -38,15 +38,17 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<Map<String, Object>> handleGenericException(
-            Exception ex
-    ) {
+    public ResponseEntity<Map<String, Object>> handleGenericException(Exception ex) {
+
+        ex.printStackTrace(); // 👈 VERY IMPORTANT
+
         Map<String, Object> response = new HashMap<>();
         response.put("timestamp", LocalDateTime.now());
         response.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
         response.put("error", "Internal Server Error");
-        response.put("message", "Something went wrong");
+        response.put("message", ex.getMessage()); // show real message
 
         return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
     }
+
 }
