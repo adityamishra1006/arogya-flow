@@ -42,7 +42,4 @@ public class Slot {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private SlotStatus status;
-
-    @OneToMany(mappedBy = "slot", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Token> tokens;
 }
