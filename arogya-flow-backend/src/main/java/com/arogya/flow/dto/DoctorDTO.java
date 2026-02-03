@@ -17,6 +17,4 @@ public class DoctorDTO {
     private String specialization;
 
     private Integer maxTokensPerSlot;
-    private LocalTime availableFrom;
-    private LocalTime availableTo;
 }
