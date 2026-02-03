@@ -27,13 +27,4 @@ public class Doctor {
 
     @Column(nullable = false)
     private Integer maxTokenPerSlot;
-
-    @Column(nullable = false)
-    private LocalTime availableFrom;
-
-    @Column(nullable = false)
-    private LocalTime availableTo;
-
-    @OneToMany(mappedBy = "doctor", cascade = CascadeType.ALL,orphanRemoval = true)
-    private List<Slot> slots;
 }
