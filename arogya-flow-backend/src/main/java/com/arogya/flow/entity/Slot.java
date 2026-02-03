@@ -14,7 +14,6 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class Slot {
 
     @Id
@@ -25,19 +24,19 @@ public class Slot {
     @JoinColumn(name = "doctor_id", nullable = false)
     private Doctor doctor;
 
-    @Column(nullable = false)
+    @Column(name = "slot_date", nullable = false)
     private LocalDate slotDate;
 
-    @Column(nullable = false)
+    @Column(name = "start_time", nullable = false)
     private LocalTime startTime;
 
-    @Column(nullable = false)
+    @Column(name = "end_time", nullable = false)
     private LocalTime endTime;
 
-    @Column(nullable = false)
+    @Column(name = "max_token", nullable = false)
     private Integer maxToken;
 
-    @Column(nullable = false)
+    @Column(name = "current_token_count",nullable = false)
     private Integer currentTokenCount;
 
     @Enumerated(EnumType.STRING)
