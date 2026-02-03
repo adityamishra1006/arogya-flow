@@ -17,23 +17,18 @@ public class DoctorService {
     private final DoctorRepository doctorRepository;
 
     public DoctorDTO createDoctor(DoctorDTO doctorDTO){
-        Doctor doctor = Doctor.builder()
-                .name(doctorDTO.getName())
-                .specialization(doctorDTO.getSpecialization())
-                .maxTokenPerSlot(doctorDTO.getMaxTokensPerSlot())
-                .availableFrom(doctorDTO.getAvailableFrom())
-                .availableTo(doctorDTO.getAvailableTo())
-                .build();
+        Doctor doctor = new Doctor();
+        doctor.setName(doctorDTO.getName());
+        doctor.setSpecialization(doctorDTO.getSpecialization());
+        doctor.setMaxTokenPerSlot(doctorDTO.getMaxTokensPerSlot());
+
         Doctor savedDoctor = doctorRepository.save(doctor);
-        System.out.println("maxTokensPerSlot = " + doctorDTO.getMaxTokensPerSlot());
 
         return new DoctorDTO(
                 savedDoctor.getId(),
                 savedDoctor.getName(),
                 savedDoctor.getSpecialization(),
-                savedDoctor.getMaxTokenPerSlot(),
-                savedDoctor.getAvailableFrom(),
-                savedDoctor.getAvailableTo()
+                savedDoctor.getMaxTokenPerSlot()
         );
     }
 
@@ -44,9 +39,7 @@ public class DoctorService {
                         doctor.getId(),
                         doctor.getName(),
                         doctor.getSpecialization(),
-                        doctor.getMaxTokenPerSlot(),
-                        doctor.getAvailableFrom(),
-                        doctor.getAvailableTo()
+                        doctor.getMaxTokenPerSlot()
                 ))
                 .collect(Collectors.toList());
     }
@@ -61,10 +54,18 @@ public class DoctorService {
                 doctor.getId(),
                 doctor.getName(),
                 doctor.getSpecialization(),
-                doctor.getMaxTokenPerSlot(),
-                doctor.getAvailableFrom(),
-                doctor.getAvailableTo()
+                doctor.getMaxTokenPerSlot()
         );
     }
+
+    public Doctor getDoctorEntity(Long id) {
+        return doctorRepository.findById(id)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Doctor not found with id : " + id
+                        )
+                );
+    }
+
 
 }
