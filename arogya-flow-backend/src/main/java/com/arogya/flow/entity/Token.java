@@ -12,7 +12,8 @@ import java.time.LocalDateTime;
         name = "tokens",
         indexes = {
                 @Index(name = "idx_token_number", columnList = "tokenNumber"),
-                @Index(name = "idx_slot_status", columnList = "status")
+                @Index(name = "idx_slot_status", columnList = "status"),
+                @Index(name = "idx_slot_id", columnList = "slot_id")
         }
 )
 @Getter
