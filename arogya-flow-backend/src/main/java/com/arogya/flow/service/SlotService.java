@@ -12,6 +12,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -20,76 +21,90 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SlotService{
     private final SlotRepository slotRepository;
-    private final DoctorRepository doctorRepository;
+    private final DoctorService doctorService;
 
 
     @Transactional
     public List<SlotDTO> createSlots(Long doctorId, SlotCreateRequestDTO request) {
 
-        // 1️⃣ Fetch doctor
-        Doctor doctor = doctorRepository.findById(doctorId)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException("Doctor not found with id: " + doctorId)
-                );
+        Doctor doctor = doctorService.getDoctorEntity(doctorId);
 
-        // 2️⃣ Validate request
         validateRequest(request);
 
-        // 3️⃣ Prevent overlapping OPD sessions
-        boolean overlapExists =
-                slotRepository.existsByDoctorIdAndSlotDateAndStartTimeLessThanAndEndTimeGreaterThan(
-                        doctorId,
-                        request.getSlotDate(),
-                        request.getEndTime(),
-                        request.getStartTime()
-                );
+        boolean overlapExist = slotRepository.existsByDoctorIdAndSlotDateAndStartTimeLessThanAndEndTimeGreaterThan(
+                doctorId,
+                request.getSlotDate(),
+                request.getStartTime(),
+                request.getEndTime()
+        );
 
-        if (overlapExists) {
-            throw new IllegalStateException(
-                    "Slot timing overlaps with an existing OPD session"
-            );
+        if(overlapExist){
+            throw new IllegalArgumentException("Slot overlaps with another slot");
         }
 
-        // 4️⃣ Generate slots
         LocalTime currentStart = request.getStartTime();
         LocalTime endTime = request.getEndTime();
         int duration = request.getSlotDurationInMinutes();
 
         List<Slot> slotsToSave = new ArrayList<>();
 
-        while (currentStart.plusMinutes(duration).compareTo(endTime) <= 0) {
-
-            LocalTime currentEnd = currentStart.plusMinutes(duration);
-
+        while(currentStart.plusMinutes(duration).compareTo(endTime) <= 0){
             Slot slot = new Slot();
             slot.setDoctor(doctor);
             slot.setSlotDate(request.getSlotDate());
             slot.setStartTime(currentStart);
-            slot.setEndTime(currentEnd);
+            slot.setEndTime(currentStart.plusMinutes(duration));
             slot.setMaxToken(doctor.getMaxTokenPerSlot());
             slot.setCurrentTokenCount(0);
             slot.setStatus(SlotStatus.OPEN);
 
             slotsToSave.add(slot);
-            currentStart = currentEnd;
+            currentStart = currentStart.plusMinutes(duration);
         }
 
-        // 5️⃣ Save slots
-        List<Slot> savedSlots = slotRepository.saveAll(slotsToSave);
+        return slotRepository.saveAll(slotsToSave)
+                .stream()
+                .map(this::mapToDTO)
+                .toList();
+    }
 
-        // 6️⃣ Convert to DTO
-        List<SlotDTO> response = new ArrayList<>();
-        for (Slot slot : savedSlots) {
-            response.add(new SlotDTO(
-                    slot.getId(),
-                    slot.getSlotDate(),
-                    slot.getStartTime(),
-                    slot.getEndTime(),
-                    slot.getStatus()
-            ));
+    public List<SlotDTO> getSlotByDoctorAndDate(Long doctorId, LocalDate date){
+        List<Slot> slots = slotRepository.findByDoctorIdAndSlotDateOrderByStartTime(
+                doctorId,
+                date
+        );
+
+        return slots.stream()
+                .map(this::mapToDTO)
+                .toList();
+    }
+
+    @Transactional
+    public void closedExpiredSlots(){
+        LocalDate today = LocalDate.now();
+        LocalTime now = LocalTime.now();
+
+        List<Slot> expiredTime = slotRepository.findByStatusAndSlotDateAndEndTimeBefore(
+                SlotStatus.OPEN,
+                today,
+                now
+        );
+
+        for(Slot slot : expiredTime){
+            slot.setStatus(SlotStatus.CLOSED);
         }
+        slotRepository.saveAll(expiredTime);
+    }
 
-        return response;
+    @Transactional
+    public void deleteOldCompletedSlots(){
+        LocalDate cutOffDate = LocalDate.now().minusDays(1);
+
+        List<Slot> oldSlots = slotRepository.findByStatusAndSlotDateBefore(
+                SlotStatus.CLOSED,
+                cutOffDate
+        );
+        slotRepository.deleteAll(oldSlots);
     }
 
 
@@ -111,5 +126,15 @@ public class SlotService{
                 request.getSlotDurationInMinutes() <= 0) {
             throw new IllegalArgumentException("Slot duration must be greater than 0");
         }
+    }
+
+    private SlotDTO mapToDTO(Slot slot) {
+        return new SlotDTO(
+                slot.getId(),
+                slot.getSlotDate(),
+                slot.getStartTime(),
+                slot.getEndTime(),
+                slot.getStatus()
+        );
     }
 }
