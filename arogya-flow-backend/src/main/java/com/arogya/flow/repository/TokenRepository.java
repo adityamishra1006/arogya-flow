@@ -1,5 +1,6 @@
 package com.arogya.flow.repository;
 
+import com.arogya.flow.entity.Slot;
 import com.arogya.flow.entity.Token;
 import com.arogya.flow.entity.enums.TokenStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -11,4 +12,6 @@ import java.util.List;
 public interface TokenRepository extends JpaRepository<Token, Long> {
     List<Token> findBySlotIdAndStatus(Long slotId, TokenStatus status);
     boolean existsByTokenNumber(String tokenNumber);
+
+    Long slot(Slot slot);
 }
