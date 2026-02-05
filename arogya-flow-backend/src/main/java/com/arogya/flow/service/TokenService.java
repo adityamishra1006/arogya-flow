@@ -73,10 +73,38 @@ public class TokenService {
         );
     }
 
+    @Transactional
     public void cancelToken(Long tokenId) {
+        Token token = tokenRepository.findById(tokenId)
+                .orElseThrow(() ->
+                    new ResourceNotFoundException("Token not found with id : " + tokenId)
+                );
+        token.setStatus(TokenStatus.CANCELLED);
+        tokenRepository.save(token);
+
+        Slot slot = token.getSlot();
+        slot.setCurrentTokenCount(
+                Math.max(slot.getCurrentTokenCount() - 1, 0)
+        );
+        slot.setStatus(SlotStatus.OPEN);
+        slotRepository.save(slot);
     }
 
+    @Transactional
     public void expireToken(Long tokenId) {
+        Token token = tokenRepository.findById(tokenId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Token not found with id : " + tokenId)
+                );
+        token.setStatus(TokenStatus.EXPIRED);
+        tokenRepository.save(token);
+
+        Slot slot = token.getSlot();
+        slot.setCurrentTokenCount(
+                Math.max(slot.getCurrentTokenCount() - 1, 0)
+        );
+        slot.setStatus(SlotStatus.OPEN);
+        slotRepository.save(slot);
     }
 
     private String generateTokenNumber(Long slotId) {
