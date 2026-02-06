@@ -24,6 +24,7 @@ import java.util.List;
 public class TokenService {
     private final SlotRepository slotRepository;
     private final TokenRepository tokenRepository;
+    private final AllocationEngine allocationEngine;
 
     @Transactional
     public TokenResponseDTO bookToken(TokenRequestDTO requestDTO) {
@@ -34,13 +35,7 @@ public class TokenService {
                         )
                 );
 
-        if(slot.getStatus() == SlotStatus.CLOSED){
-            throw new SlotFullException("Slot is already closed");
-        }
-
-        if(slot.getCurrentTokenCount() >= slot.getMaxToken() && requestDTO.getSource() != TokenSource.EMERGENCY){
-            throw new SlotFullException("Slot is full");
-        }
+        allocationEngine.validateAllocation(slot, requestDTO.getSource());
 
         int priority = PriorityUtils.calculatePriority(requestDTO.getSource());
         String tokenNumber = generateTokenNumber(slot.getId());
@@ -54,17 +49,11 @@ public class TokenService {
 
         tokenRepository.save(token);
 
-        if(requestDTO.getSource() == TokenSource.EMERGENCY){
-            slot.setCurrentTokenCount(slot.getCurrentTokenCount() + 1);
-        }
-
-        if(slot.getCurrentTokenCount() >= slot.getMaxToken()){
-            slot.setStatus(SlotStatus.FULL);
-        }
+        allocationEngine.updateSlotAfterAllocation(slot, requestDTO.getSource());
 
         slotRepository.save(slot);
 
-        int queuePosition = calculateQueuePriorityPosition(token);
+        int queuePosition = allocationEngine.claculateQueuePosition(token);
 
         return new TokenResponseDTO(
                 token.getTokenNumber(),
@@ -83,10 +72,7 @@ public class TokenService {
         tokenRepository.save(token);
 
         Slot slot = token.getSlot();
-        slot.setCurrentTokenCount(
-                Math.max(slot.getCurrentTokenCount() - 1, 0)
-        );
-        slot.setStatus(SlotStatus.OPEN);
+        allocationEngine.releaseSlot(slot);
         slotRepository.save(slot);
     }
 
@@ -100,10 +86,7 @@ public class TokenService {
         tokenRepository.save(token);
 
         Slot slot = token.getSlot();
-        slot.setCurrentTokenCount(
-                Math.max(slot.getCurrentTokenCount() - 1, 0)
-        );
-        slot.setStatus(SlotStatus.OPEN);
+        allocationEngine.releaseSlot(slot);
         slotRepository.save(slot);
     }
 
