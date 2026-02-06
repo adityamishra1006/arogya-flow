@@ -98,22 +98,4 @@ public class TokenService {
         return tokenNumber;
     }
 
-    private int calculateQueuePriorityPosition(Token currentToken) {
-        List<Token> activeTokens = tokenRepository.findBySlotIdAndStatus(
-                currentToken.getSlot().getId(),
-                TokenStatus.CREATED
-        );
-
-        activeTokens.sort(
-                Comparator
-                        .comparingInt(Token::getPriority)
-                        .thenComparing(Token::getCreatedAt)
-        );
-        for (int i = 0; i< activeTokens.size(); i++){
-            if(activeTokens.get(i).getId().equals(currentToken.getId())){
-                return i+1;
-            }
-        }
-        return activeTokens.size();
-    }
 }
