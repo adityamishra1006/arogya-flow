@@ -1,5 +1,4 @@
 import axiosInstance from "./axiosInstance.js";
-import axios from "axios";
 
 export const createDoctor = (doctorData) => {
     return axiosInstance.post("/doctors", doctorData);

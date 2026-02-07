@@ -6,3 +6,4 @@ import axiosInstance from "./axiosInstance.js";
 export const getDashboardStats = () => {
     return axiosInstance.get("/dashboard/stats");
 }
+
