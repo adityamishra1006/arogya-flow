@@ -1,21 +1,24 @@
 import { useEffect, useState } from "react";
 import { getDashboardStats } from "../api/dashboardApi";
 import Loader from "../components/common/Loader";
+import Button from "../components/common/Button";
 
 export default function Dashboard() {
     const [stats, setStats] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [refreshing, setRefreshing] = useState(false);
     const [error, setError] = useState(null);
 
     useEffect(() => {
         fetchDashboardStats();
     }, []);
 
-    const fetchDashboardStats = async () => {
+    const fetchDashboardStats = async (isRefresh = false) => {
         try {
-            setLoading(true);
+            isRefresh ? setRefreshing(true) : setLoading(true);
+
             const response = await getDashboardStats();
-            setStats(response.data);
+            setStats({...response.data});
             setError(null);
         } catch (err) {
             setError("Failed to load dashboard statistics");
@@ -42,13 +45,22 @@ export default function Dashboard() {
 
     return (
         <div className="min-h-screen bg-gray-100 p-6">
-            <h1 className="text-2xl font-bold mb-6">Arogya Flow Dashboard</h1>
+            {/* Header */}
+            <div className="flex items-center justify-between mb-6">
+                <h1 className="text-2xl font-bold">Arogya Flow Dashboard</h1>
+                <Button
+                    onClick={() => fetchDashboardStats()}
+                    disabled={refreshing}
+                >
+                    {refreshing ? "Refreshing..." : "Refresh Stats"}
+                </Button>
+            </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                <StatCard title="Total Doctors" value={stats.totalDoctors} />
-                <StatCard title="Total Slots" value={stats.totalSlots} />
-                <StatCard title="Total Tokens" value={stats.totalTokens} />
-                <StatCard title="Active Tokens" value={stats.activityTokens} />
+                <StatCard title="Total Doctors" value={stats?.totalDoctors ?? 0} />
+                <StatCard title="Total Slots" value={stats?.totalSlots ?? 0} />
+                <StatCard title="Total Tokens" value={stats?.totalTokens ?? 0} />
+                <StatCard title="Active Tokens" value={stats?.activityTokens ?? 0} />
             </div>
         </div>
     );

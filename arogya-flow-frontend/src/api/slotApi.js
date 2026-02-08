@@ -5,7 +5,7 @@ export const createSlotsForDoctor = (doctorId, slotRequest) => {
 };
 
 export const getSlotsByDoctorAndDate = (doctorId, date) => {
-    return axiosInstance.get(`/slots/doctos/${doctorId}`,{
+    return axiosInstance.get(`/slots/doctors/${doctorId}`,{
         params:{date},
     });
 };

@@ -1,10 +1,31 @@
+import { BrowserRouter, Link } from "react-router-dom";
+import AppRoutes from "./routes/AppRoutes";
+
 function App() {
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-100">
-            <h1 className="text-3xl font-bold text-blue-600">
-                Arogya Flow Frontend is Running 🚀
-            </h1>
-        </div>
+        <BrowserRouter>
+            {/* Top Navigation */}
+            <nav className="bg-blue-600 text-white px-6 py-4 flex gap-6">
+                <Link
+                    to="/"
+                    className="font-semibold hover:underline"
+                >
+                    Dashboard
+                </Link>
+
+                <Link
+                    to="/doctors"
+                    className="font-semibold hover:underline"
+                >
+                    Doctors
+                </Link>
+            </nav>
+
+            {/* Page Content */}
+            <main className="min-h-screen bg-gray-100">
+                <AppRoutes />
+            </main>
+        </BrowserRouter>
     );
 }
 
