@@ -1,5 +1,6 @@
-import {useEffect, useState} from "react";
-import {getDashboardStats} from "../api/dashboardApi.js";
+import { useEffect, useState } from "react";
+import { getDashboardStats } from "../api/dashboardApi";
+import Loader from "../components/common/Loader";
 
 export default function Dashboard() {
     const [stats, setStats] = useState(null);
@@ -17,9 +18,8 @@ export default function Dashboard() {
             setStats(response.data);
             setError(null);
         } catch (err) {
-            console.log(err);
-            setError("Failed to load dashboard Stats")
-        } finally{
+            setError("Failed to load dashboard statistics");
+        } finally {
             setLoading(false);
         }
     };
@@ -27,36 +27,36 @@ export default function Dashboard() {
     if (loading) {
         return (
             <div className="min-h-screen flex items-center justify-center">
-                <p className="text-lg font-medium">Loading dashboard...</p>
+                <Loader text="Loading dashboard..." />
             </div>
         );
     }
 
-    if(error){
+    if (error) {
         return (
-            <div classname="min-h-screen flex items-center justify-center">
+            <div className="min-h-screen flex items-center justify-center">
                 <p className="text-red-600 font-medium">{error}</p>
             </div>
         );
     }
 
-    return(
+    return (
         <div className="min-h-screen bg-gray-100 p-6">
             <h1 className="text-2xl font-bold mb-6">Arogya Flow Dashboard</h1>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                <StatCard title = "Total Doctoes" value={stats.totalDoctors}/>
+                <StatCard title="Total Doctors" value={stats.totalDoctors} />
                 <StatCard title="Total Slots" value={stats.totalSlots} />
                 <StatCard title="Total Tokens" value={stats.totalTokens} />
                 <StatCard title="Active Tokens" value={stats.activityTokens} />
             </div>
         </div>
-    )
+    );
 }
 
-function StatCard({title,value}){
-    return(
-        <div className="bg-white rounded shadow p-5">
+function StatCard({ title, value }) {
+    return (
+        <div className="bg-white rounded-lg shadow p-5">
             <p className="text-sm text-gray-500">{title}</p>
             <p className="text-3xl font-bold mt-2">{value}</p>
         </div>
