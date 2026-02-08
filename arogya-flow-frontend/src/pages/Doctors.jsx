@@ -18,7 +18,7 @@ export default function Doctors(){
             setError(null);
         } catch(err){
             console.log(err);
-            setError(err);
+            setError("Failed to load doctors. Please try again later.");
         } finally {
             setLoading(false);
         }

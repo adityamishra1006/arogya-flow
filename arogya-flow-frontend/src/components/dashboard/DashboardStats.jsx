@@ -15,7 +15,7 @@ export default function DashboardStats({stats}) {
             />
             <StatCard
                 title="Active Tokens"
-                value={stats?.activeTokens ?? 0}
+                value={stats?.activeTokens  ?? 0}
             />
         </div>
     )

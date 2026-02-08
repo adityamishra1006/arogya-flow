@@ -31,7 +31,7 @@ export default function QueueView({queue = [], onRefresh}) {
 
 function QueueItem({ item }) {
     return (
-        <div className="flex items-center justify-between borer rounded-md p-3">
+        <div className="flex items-center justify-between border rounded-md p-3">
             <div>
                 <p className="font-medium">
                     Token #{item.tokenNumber}
