@@ -1,5 +1,6 @@
 package com.arogya.flow.service;
 
+import com.arogya.flow.dto.SlotAvailabilityDTO;
 import com.arogya.flow.dto.SlotCreateRequestDTO;
 import com.arogya.flow.dto.SlotDTO;
 import com.arogya.flow.entity.Doctor;
@@ -28,7 +29,6 @@ public class SlotService{
     public List<SlotDTO> createSlots(Long doctorId, SlotCreateRequestDTO request) {
 
         Doctor doctor = doctorService.getDoctorEntity(doctorId);
-
         validateRequest(request);
 
         boolean overlapExist = slotRepository.existsByDoctorIdAndSlotDateAndStartTimeLessThanAndEndTimeGreaterThan(
@@ -42,29 +42,30 @@ public class SlotService{
             throw new IllegalArgumentException("Slot overlaps with another slot");
         }
 
-        LocalTime currentStart = request.getStartTime();
-        LocalTime endTime = request.getEndTime();
-        int duration = request.getSlotDurationInMinutes();
-
         List<Slot> slotsToSave = new ArrayList<>();
+        LocalTime currentStart = request.getStartTime();
+//        LocalTime endTime = request.getEndTime();
+//        int duration = request.getSlotDurationInMinutes();
 
-        while(currentStart.plusMinutes(duration).compareTo(endTime) <= 0){
+//        List<Slot> slotsToSave = new ArrayList<>();
+
+        while(currentStart.plusMinutes(request.getSlotDurationInMinutes()).compareTo(request.getEndTime()) <= 0){
             Slot slot = new Slot();
             slot.setDoctor(doctor);
             slot.setSlotDate(request.getSlotDate());
             slot.setStartTime(currentStart);
-            slot.setEndTime(currentStart.plusMinutes(duration));
+            slot.setEndTime(currentStart.plusMinutes(request.getSlotDurationInMinutes()));
             slot.setMaxToken(doctor.getMaxTokenPerSlot());
             slot.setCurrentTokenCount(0);
             slot.setStatus(SlotStatus.OPEN);
 
             slotsToSave.add(slot);
-            currentStart = currentStart.plusMinutes(duration);
+            currentStart = currentStart.plusMinutes(request.getSlotDurationInMinutes());
         }
 
         return slotRepository.saveAll(slotsToSave)
                 .stream()
-                .map(this::mapToDTO)
+                .map(this::mapToAvailabilityDTO)
                 .toList();
     }
 
@@ -75,7 +76,7 @@ public class SlotService{
         );
 
         return slots.stream()
-                .map(this::mapToDTO)
+                .map(this::mapToAvailabilityDTO)
                 .toList();
     }
 
@@ -128,13 +129,20 @@ public class SlotService{
         }
     }
 
-    private SlotDTO mapToDTO(Slot slot) {
-        return new SlotDTO(
+    private SlotAvailabilityDTO mapToAvailabilityDTO(Slot slot) {
+        int remaining = Math.max(
+                slot.getMaxToken() - slot.getCurrentTokenCount(),
+                0
+        );
+
+        return new SlotAvailabilityDTO(
                 slot.getId(),
                 slot.getSlotDate(),
                 slot.getStartTime(),
                 slot.getEndTime(),
-                slot.getStatus()
+                slot.getStatus(),
+                slot.getMaxToken(),
+                remaining
         );
     }
 }
