@@ -1,7 +1,7 @@
 import { Route, Routes } from "react-router-dom";
 import Dashboard from "../pages/Dashboard.jsx";
 import Doctors from "../pages/Doctors.jsx";
-import Slots from "../pages/DoctorSlots.jsx";
+import Slots from "../pages/Slots.jsx";
 import NotFound from "../pages/NotFound.jsx";
 
 export default function AppRoutes() {
