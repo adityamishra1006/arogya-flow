@@ -1,68 +1,93 @@
-import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
-import { getSlotsByDoctorAndDate } from "../api/slotApi";
-import SlotCard from "../components/slots/SlotCard";
-import Loader from "../components/common/Loader";
+import {useParams} from "react-router-dom";
+import {useEffect, useState} from "react";
+import {getDoctorsById} from "../api/doctorApi.js";
+import {getSlotsByDoctorAndDate} from "../api/slotApi.js";
+import {bookToken} from "../api/tokenApi.js";
+import SlotCard from "../components/slots/SlotCard.jsx";
 
-export default function Slots() {
+
+export default function Slots(){
     const { doctorId } = useParams();
 
+    const [doctor, setDoctor] = useState(null);
     const [slots, setSlots] = useState([]);
+    const [patientsToday, setPatientsToday] = useState(0);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
-
-    // 👇 today’s date in backend format
-    const today = new Date().toISOString().split("T")[0];
 
     useEffect(() => {
-        fetchSlots();
+        loadData()
     }, [doctorId]);
 
-    const fetchSlots = async () => {
-        try {
+    const loadData = async () => {
+        try{
             setLoading(true);
-            const response = await getSlotsByDoctorAndDate(doctorId, today);
-            setSlots(response.data);
-            setError(null);
-        } catch (err) {
-            console.error(err);
-            setError("Failed to load slots");
-        } finally {
+
+            const doctorRes = await getDoctorsById(doctorId);
+            setDoctor(doctorRes.data);
+
+            const today = new Date().toISOString().split("T")[0];
+            const slotRes = await getSlotsByDoctorAndDate(doctorId, today);
+            const slotWithState = slotRes.data.map( slot => ({
+                ...slot,
+                isBooked: false,
+            }));
+            setSlots(slotWithState);
+        } catch (err){
+            console.error("Failed to load slots ",  err);
+        }finally {
             setLoading(false);
         }
     };
 
-    if (loading) {
-        return <Loader text="Loading slots..." />;
-    }
+    const handleBookSlot = async (slot) => {
+        try{
+            await bookToken({
+                doctorId: doctorId,
+                slotId: slot.id,
+                source:"ONLINE",
+            });
 
-    if (error) {
-        return <p className="text-red-600">{error}</p>;
+            setSlots(prev =>
+                prev.map(s =>
+                    s.id === slot.id ? {...s, isBooked: true} : s
+                )
+            );
+
+            setPatientsToday(prev =>prev+1);
+        }catch (err){
+            console.error("Failed to book slots", err);
+        }
+    };
+
+    if(loading){
+        return (
+            <div className="min-h-screen flex items-center justify-center">
+                <p className="text-gray-600">Loading slots...</p>
+            </div>
+        );
     }
 
     return (
         <div className="min-h-screen bg-gray-100 p-6">
-            <h1 className="text-2xl font-bold mb-6">
-                Slots for Doctor ID: {doctorId}
+            {/* FIX: doctor name instead of ID */}
+            <h1 className="text-2xl font-bold mb-1">
+                Slots for Dr. {doctor?.name}
             </h1>
 
-            {slots.length === 0 ? (
-                <p className="text-gray-600">No slots available</p>
-            ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {slots.map((slot) => (
-                        <SlotCard
-                            key={slot.id}
-                            slot={{
-                                ...slot,
-                                doctorName: doctorId,
-                                totalTokens: null,
-                                availableTokens: null,
-                            }}
-                        />
-                    ))}
-                </div>
-            )}
+            {/* FIX: patient count near doctor name */}
+            <p className="text-sm text-gray-600 mb-6">
+                Patients Today: {patientsToday}
+            </p>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {slots.map(slot => (
+                    <SlotCard
+                        key={slot.id}
+                        slot={slot}
+                        onBook={handleBookSlot}
+                    />
+                ))}
+            </div>
         </div>
     );
 }
