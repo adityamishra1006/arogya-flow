@@ -11,6 +11,7 @@ import com.arogya.flow.repository.DoctorRepository;
 import com.arogya.flow.repository.SlotRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -92,6 +93,7 @@ public class SlotService{
                 .toList();
     }
 
+    @Scheduled(fixedRate = 60000)
     @Transactional
     public void closedExpiredSlots(){
         LocalDate today = LocalDate.now();
