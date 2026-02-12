@@ -26,41 +26,52 @@ public class SlotService{
 
 
     @Transactional
-    public List<SlotDTO> createSlots(Long doctorId, SlotCreateRequestDTO request) {
+    public List<SlotAvailabilityDTO> createSlots(Long doctorId, SlotCreateRequestDTO request) {
 
         Doctor doctor = doctorService.getDoctorEntity(doctorId);
         validateRequest(request);
 
-        boolean overlapExist = slotRepository.existsByDoctorIdAndSlotDateAndStartTimeLessThanAndEndTimeGreaterThan(
-                doctorId,
-                request.getSlotDate(),
-                request.getStartTime(),
-                request.getEndTime()
-        );
+        if (request.getSlotDate().isBefore(LocalDate.now())) {
+            throw new IllegalArgumentException("Cannot create slots for past date");
+        }
 
-        if(overlapExist){
-            throw new IllegalArgumentException("Slot overlaps with another slot");
+        if (doctor.getMaxTokenPerSlot() == null || doctor.getMaxTokenPerSlot() <= 0) {
+            throw new IllegalArgumentException("Doctor maxTokenPerSlot invalid");
         }
 
         List<Slot> slotsToSave = new ArrayList<>();
         LocalTime currentStart = request.getStartTime();
-//        LocalTime endTime = request.getEndTime();
-//        int duration = request.getSlotDurationInMinutes();
+        int duration = request.getSlotDurationInMinutes();
 
-//        List<Slot> slotsToSave = new ArrayList<>();
+        while (!currentStart.plusMinutes(duration).isAfter(request.getEndTime())) {
 
-        while(currentStart.plusMinutes(request.getSlotDurationInMinutes()).compareTo(request.getEndTime()) <= 0){
+            LocalTime slotEnd = currentStart.plusMinutes(duration);
+
+            boolean overlapExist =
+                    slotRepository.existsByDoctorIdAndSlotDateAndStartTimeLessThanAndEndTimeGreaterThan(
+                            doctorId,
+                            request.getSlotDate(),
+                            slotEnd,
+                            currentStart
+                    );
+
+            if (overlapExist) {
+                throw new IllegalArgumentException(
+                        "Slot overlaps at " + currentStart + " - " + slotEnd
+                );
+            }
+
             Slot slot = new Slot();
             slot.setDoctor(doctor);
             slot.setSlotDate(request.getSlotDate());
             slot.setStartTime(currentStart);
-            slot.setEndTime(currentStart.plusMinutes(request.getSlotDurationInMinutes()));
+            slot.setEndTime(slotEnd);
             slot.setMaxToken(doctor.getMaxTokenPerSlot());
             slot.setCurrentTokenCount(0);
             slot.setStatus(SlotStatus.OPEN);
 
             slotsToSave.add(slot);
-            currentStart = currentStart.plusMinutes(request.getSlotDurationInMinutes());
+            currentStart = slotEnd;
         }
 
         return slotRepository.saveAll(slotsToSave)
@@ -69,7 +80,8 @@ public class SlotService{
                 .toList();
     }
 
-    public List<SlotDTO> getSlotByDoctorAndDate(Long doctorId, LocalDate date){
+
+    public List<SlotAvailabilityDTO> getSlotByDoctorAndDate(Long doctorId, LocalDate date){
         List<Slot> slots = slotRepository.findByDoctorIdAndSlotDateOrderByStartTime(
                 doctorId,
                 date
