@@ -1,5 +1,6 @@
 package com.arogya.flow.controller;
 
+import com.arogya.flow.dto.SlotAvailabilityDTO;
 import com.arogya.flow.dto.SlotCreateRequestDTO;
 import com.arogya.flow.dto.SlotDTO;
 import com.arogya.flow.service.SlotService;
@@ -19,13 +20,19 @@ public class SlotController {
     private final SlotService slotService;
 
     @PostMapping("/doctors/{doctorId}")
-    public ResponseEntity<List<SlotDTO>> createSlots(@PathVariable Long doctorId, @RequestBody SlotCreateRequestDTO request){
-        List<SlotDTO> response = slotService.createSlots(doctorId, request);
+    public ResponseEntity<List<SlotAvailabilityDTO>> createSlots(
+            @PathVariable Long doctorId,
+            @RequestBody SlotCreateRequestDTO request
+    ) {
+        List<SlotAvailabilityDTO> response = slotService.createSlots(doctorId, request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @GetMapping("/doctor/{doctorId}")
-    public ResponseEntity<List<SlotDTO>> getSlotsByDoctorAndDate(@PathVariable Long doctorId, @RequestParam LocalDate date){
-        return ResponseEntity.ok((slotService.getSlotByDoctorAndDate(doctorId, date)));
+    public ResponseEntity<List<SlotAvailabilityDTO>> getSlotsByDoctorAndDate(
+            @PathVariable Long doctorId,
+            @RequestParam LocalDate date
+    ) {
+        return ResponseEntity.ok(slotService.getSlotByDoctorAndDate(doctorId, date));
     }
 }
