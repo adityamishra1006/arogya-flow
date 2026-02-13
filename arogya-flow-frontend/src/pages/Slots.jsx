@@ -30,10 +30,21 @@ export default function Slots() {
         setSlots(res.data);
     };
 
-    const handleBooking = async (data) => {
-        await bookSlot(data);
-        setSelectedSlot(null);
-        fetchSlots();
+    const handleBooking = async (bookingData) => {
+        try {
+            await bookSlot({
+                slotId: bookingData.slotId,
+                patientName: bookingData.patientName,
+                email: bookingData.email,
+            });
+
+            fetchSlots();
+            setSelectedSlot(null);
+
+        } catch (err) {
+            console.error(err);
+            alert("Booking failed");
+        }
     };
 
     if (!doctor) return null;

@@ -7,20 +7,21 @@ export default function BookSlotModal({ isOpen, onClose, onSubmit, slot }){
     const [email, setEmail] = useState("");
 
     const handleSubmit = () => {
-        if(!patientName || !email){
-            alert("Please enter a valid details");
+        if (!patientName || !email) {
+            alert("Please enter valid details");
             return;
         }
 
         onSubmit({
             slotId: slot.id,
-            patientName,
-            email,
+            patientName: patientName,
+            email: email,
         });
 
         setPatientName("");
         setEmail("");
     };
+
 
     return(
         <Modal
