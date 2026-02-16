@@ -47,7 +47,7 @@ export default function SlotCard({ slot, onBook }) {
             {/* ✅ SHOW BUTTON ONLY IF SLOT IS OPEN */}
             {slot.status === "OPEN" && (
                 <button
-                    onClick={() => onBook(slot.id)}
+                    onClick={() => onBook(slot)}
                     className="mt-4 w-full bg-blue-600 text-white rounded-md px-4 py-2 text-sm font-medium hover:bg-blue-700 transition"
                 >
                     Book Slot
