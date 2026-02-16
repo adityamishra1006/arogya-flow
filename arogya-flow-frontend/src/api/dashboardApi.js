@@ -7,3 +7,6 @@ export const getDashboardStats = () => {
     return axiosInstance.get("/dashboard/stats");
 }
 
+export const resetDashboard = () => {
+    axiosInstance.post("/dashboard/reset");
+}
