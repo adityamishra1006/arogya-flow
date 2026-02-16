@@ -10,6 +10,7 @@ import lombok.Setter;
 public class DashboardStatsDTO {
     private Long totalDoctors;
     private Long totalSlots;
-    private Long totalTokens;
-    private Long activeTokens;
+    private Long bookedSlots;
+    private Long openSlots;
+    private Long upcomingAppiontment;
 }
