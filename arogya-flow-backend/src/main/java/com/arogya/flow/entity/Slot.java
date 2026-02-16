@@ -39,6 +39,9 @@ public class Slot {
     @Column(name = "current_token_count",nullable = false)
     private Integer currentTokenCount;
 
+    @OneToOne(mappedBy = "slot", fetch = FetchType.LAZY)
+    private Appointment appointment;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private SlotStatus status;

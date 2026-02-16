@@ -34,12 +34,14 @@ public class AppointmentService {
         Appointment appointment = Appointment.builder()
                 .patientName(request.getPatientName())
                 .email(request.getEmail())
-                .slot(slot)
                 .build();
+
+        appointment.setSlot(slot);
+        slot.setAppointment(appointment);
+        slot.setStatus(SlotStatus.BOOKED);
 
         Appointment saved = appointmentRepository.save(appointment);
 
-        slot.setStatus(SlotStatus.BOOKED);
         slotRepository.save(slot);
 
         return new AppointmentDTO(

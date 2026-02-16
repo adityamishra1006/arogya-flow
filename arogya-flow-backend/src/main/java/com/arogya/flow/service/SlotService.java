@@ -156,6 +156,12 @@ public class SlotService{
                 0
         );
 
+        String patientName = null;
+
+        if(slot.getStatus() == SlotStatus.BOOKED && slot.getAppointment() != null){
+            patientName = slot.getAppointment().getPatientName();
+        }
+
         return new SlotAvailabilityDTO(
                 slot.getId(),
                 slot.getSlotDate(),
@@ -163,7 +169,8 @@ public class SlotService{
                 slot.getEndTime(),
                 slot.getStatus(),
                 slot.getMaxToken(),
-                remaining
+                remaining,
+                patientName
         );
     }
 }

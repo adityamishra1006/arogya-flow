@@ -19,7 +19,7 @@ public class Appointment {
     private String patientName;
     private String email;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "slot_id", nullable = false, unique = true)
     private Slot slot;
 }
