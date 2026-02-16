@@ -29,4 +29,8 @@ public interface SlotRepository extends JpaRepository<Slot, Long> {
             LocalDate date
     );
     boolean existsByDoctorIdAndSlotDateAndStartTimeLessThanAndEndTimeGreaterThan(Long doctorId, LocalDate slotDate, LocalTime endTime, LocalTime startTime);
+
+    List<Slot> findBySlotDateBefore(LocalDate today);
+
+    long countByStatus(SlotStatus slotStatus);
 }
