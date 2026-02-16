@@ -32,7 +32,7 @@ export default function Doctors() {
                             {doc.specialization}
                         </p>
 
-                        <div className="mt-4">
+                        <div className="mt-4 flex gap-3">
                             <Button
                                 onClick={() =>
                                     navigate(`/doctors/${doc.id}/slots`)
@@ -40,7 +40,17 @@ export default function Doctors() {
                             >
                                 View Slots
                             </Button>
+
+                            <Button
+                                variant="secondary"
+                                onClick={() =>
+                                    navigate(`/doctors/${doc.id}/create-slots`)
+                                }
+                            >
+                                Create Slots
+                            </Button>
                         </div>
+
                     </div>
                 ))}
             </div>
