@@ -23,4 +23,6 @@ public class SlotAvailabilityDTO {
 
     private Integer totalPatients;
     private Integer remainingPatients;
+
+    private String patientName;
 }
