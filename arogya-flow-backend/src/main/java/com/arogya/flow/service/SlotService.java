@@ -122,6 +122,13 @@ public class SlotService{
         slotRepository.deleteAll(oldSlots);
     }
 
+    public void resetDailySlots(){
+        LocalDate today = LocalDate.now();
+        List<Slot> oldSlots = slotRepository.findBySlotDateBefore(today);
+        slotRepository.deleteAll(oldSlots);
+        System.out.println("Daily slots reset successfully");
+    }
+
 
     private void validateRequest(SlotCreateRequestDTO request) {
 
