@@ -1,143 +1,83 @@
-import { useEffect, useState } from "react";
-import {getDashboardStats, resetDashboard} from "../api/dashboardApi";
-import Loader from "../components/common/Loader";
-import Button from "../components/common/Button";
-import CountUp from "react-countup";
+import {useEffect, useState} from "react";
+import Button from "../components/common/Button.jsx";
+import StatCard from "../components/common/StatCard.jsx";
+import {getDashboardStats, resetDashboard} from "../api/dashboardApi.js";
 
 export default function Dashboard() {
+
     const [stats, setStats] = useState(null);
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
-    const [error, setError] = useState(null);
 
     useEffect(() => {
-        fetchDashboardStats();
+        fetchStats();
     }, []);
 
-    const handleReset = async () => {
-        try{
-            setRefreshing(true);
-            await resetDashboard();
-            await fetchDashboardStats();
-        }catch (err) {
-            alert("Failed to reset dashboard");
-            console.log(err);
-        } finally {
-            setRefreshing(false);
-        }
-    }
-
-    const fetchDashboardStats = async (isRefresh = false) => {
+    const fetchStats = async () => {
         try {
-            isRefresh ? setRefreshing(true) : setLoading(true);
-
-            const response = await getDashboardStats();
-            setStats({ ...response.data });
-            setError(null);
+            const res = await getDashboardStats();
+            setStats(res.data);
         } catch (err) {
-            console.error(err);
-            setError("Failed to load dashboard statistics");
+            console.error("Dashboard load failed", err);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleReset = async () => {
+        try {
+            setRefreshing(true);
+            await resetDashboard();
+            await fetchStats();
+        } catch (err) {
+            console.error("Reset failed", err);
+        } finally {
             setRefreshing(false);
         }
     };
 
     if (loading) {
         return (
-            <div className="min-h-screen flex items-center justify-center">
-                <Loader text="Loading dashboard..." />
-            </div>
-        );
-    }
-
-    if (error) {
-        return (
-            <div className="min-h-screen flex items-center justify-center">
-                <p className="text-red-600 font-medium">{error}</p>
-            </div>
+            <div className="p-6">Loading dashboard...</div>
         );
     }
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 p-6">
-        {/* Header */}
-            <div className="flex items-center justify-between mb-6">
-                <h1 className="text-2xl font-bold">
-                    Arogya Flow Dashboard
-                </h1>
 
-                <Button
-                    onClick={handleReset}
-                    disabled={refreshing}
-                >
+            {/* Header */}
+            <div className="flex justify-between items-center mb-6">
+                <div>
+                    <h1 className="text-2xl font-bold">
+                        Arogya Flow Dashboard
+                    </h1>
+
+                    <p className="text-sm text-gray-500 mt-1">
+                        Today: <span className="font-medium">{stats?.todayDate}</span>
+                    </p>
+                </div>
+
+                <Button onClick={handleReset} disabled={refreshing}>
                     {refreshing ? "Resetting..." : "Reset Stats"}
                 </Button>
-
             </div>
 
             {/* Stats Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-6">
+
+                <StatCard title="Total Doctors" value={stats?.totalDoctors ?? 0} />
+                <StatCard title="Total Slots" value={stats?.totalSlots ?? 0} />
+                <StatCard title="Booked Slots" value={stats?.bookedSlots ?? 0} />
+                <StatCard title="Available Slots" value={stats?.openSlots ?? 0} />
+
+                <StatCard title="Today's Bookings" value={stats?.todaysBookings ?? 0} />
 
                 <StatCard
-                    title="Total Doctors"
-                    value={stats?.totalDoctors ?? 0}
-                />
-
-                <StatCard
-                    title="Total Slots"
-                    value={stats?.totalSlots ?? 0}
-                />
-
-                <StatCard
-                    title="Booked Slots"
-                    value={stats?.bookedSlots ?? 0}
-                />
-
-                <StatCard
-                    title="Available Slots"
-                    value={stats?.openSlots ?? 0}
-                />
-
-                <StatCard
-                    title="Upcoming Appointments"
-                    value={stats?.upcomingAppointments ?? 0}
+                    title="Next Available Slot"
+                    value={stats?.nextAvailableSlot ?? "No slots"}
                 />
 
             </div>
         </div>
     );
 }
-
-function StatCard({ title, value }) {
-
-    const getColor = () => {
-        if (title.includes("Booked")) return "text-red-600";
-        if (title.includes("Available")) return "text-green-600";
-        if (title.includes("Upcoming")) return "text-indigo-600";
-        return "text-gray-800";
-    };
-
-    return (
-        <div className="
-            bg-white rounded-xl shadow-md p-5
-            transition-all duration-300
-            hover:shadow-xl hover:-translate-y-1
-        ">
-            <p className="text-sm text-gray-500">
-                {title}
-            </p>
-
-            <p className={`text-3xl font-bold mt-2 ${getColor()}`}>
-                <CountUp
-                    start={0}
-                    end={value}
-                    duration={value > 50 ? 2 : 1}
-                    enableScrollSpy
-                    scrollSpyDelay={200}
-                />
-            </p>
-        </div>
-    );
-}
-
