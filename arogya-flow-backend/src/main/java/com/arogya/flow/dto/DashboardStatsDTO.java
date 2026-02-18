@@ -4,6 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.List;
+
 @Setter
 @Getter
 @AllArgsConstructor
@@ -16,4 +18,6 @@ public class DashboardStatsDTO {
     private Long todaysBookings;
     private String nextAvailableSlot;
     private String todayDate;
+
+    private List<UpcomingAppointentDTO> upcomingAppointments;
 }
