@@ -11,16 +11,5 @@ import java.time.LocalTime;
 
 @Repository
 public interface AppointmentRepository extends JpaRepository<Appointment, Long> {
-
-    @Query("""
-        SELECT COUNT(a)
-        FROM Appointment a
-        WHERE 
-            a.slot.slotDate > :today
-            OR (a.slot.slotDate = :today AND a.slot.endTime > :now)
-    """)
-    long countUpcomingAppointments(
-            @Param("today") LocalDate today,
-            @Param("now") LocalTime now
-    );
+    long countBySlot_SlotDate(LocalDate slotDate);
 }
