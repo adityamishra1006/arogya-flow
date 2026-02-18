@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import {getDashboardStats, resetDashboard} from "../api/dashboardApi";
 import Loader from "../components/common/Loader";
 import Button from "../components/common/Button";
+import CountUp from "react-countup";
 
 export default function Dashboard() {
     const [stats, setStats] = useState(null);
@@ -111,19 +112,23 @@ export default function Dashboard() {
 function StatCard({ title, value }) {
     return (
         <div className="
-            bg-white/80 backdrop-blur-sm
-            rounded-xl shadow-md
-            p-5
+            bg-white rounded-xl shadow-md p-5
             transition-all duration-300
-            hover:shadow-xl hover:-translate-y-1 hover:scale-[1.02]
+            hover:shadow-xl hover:-translate-y-1
         ">
             <p className="text-sm text-gray-500">
                 {title}
             </p>
 
             <p className="text-3xl font-bold mt-2 text-gray-800">
-                {value}
+                <CountUp
+                    start={0}
+                    end={value}
+                    duration={1.2}
+                    separator=","
+                />
             </p>
         </div>
     );
 }
+
