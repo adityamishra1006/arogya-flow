@@ -110,6 +110,14 @@ export default function Dashboard() {
 }
 
 function StatCard({ title, value }) {
+
+    const getColor = () => {
+        if (title.includes("Booked")) return "text-red-600";
+        if (title.includes("Available")) return "text-green-600";
+        if (title.includes("Upcoming")) return "text-indigo-600";
+        return "text-gray-800";
+    };
+
     return (
         <div className="
             bg-white rounded-xl shadow-md p-5
@@ -120,12 +128,13 @@ function StatCard({ title, value }) {
                 {title}
             </p>
 
-            <p className="text-3xl font-bold mt-2 text-gray-800">
+            <p className={`text-3xl font-bold mt-2 ${getColor()}`}>
                 <CountUp
                     start={0}
                     end={value}
-                    duration={1.2}
-                    separator=","
+                    duration={value > 50 ? 2 : 1}
+                    enableScrollSpy
+                    scrollSpyDelay={200}
                 />
             </p>
         </div>
