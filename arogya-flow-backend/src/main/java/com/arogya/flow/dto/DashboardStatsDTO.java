@@ -12,5 +12,8 @@ public class DashboardStatsDTO {
     private Long totalSlots;
     private Long bookedSlots;
     private Long openSlots;
-    private Long upcomingAppiontment;
+
+    private Long todaysBookings;
+    private String nextAvailableSlot;
+    private String todayDate;
 }
