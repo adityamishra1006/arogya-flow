@@ -20,7 +20,8 @@ public class DoctorService {
         Doctor doctor = new Doctor();
         doctor.setName(doctorDTO.getName());
         doctor.setSpecialization(doctorDTO.getSpecialization());
-        doctor.setMaxTokenPerSlot(doctorDTO.getMaxTokensPerSlot());
+        doctor.setMaxTokenPerSlot(doctorDTO.getMaxTokensPerSlot() != null
+        ? doctorDTO.getMaxTokensPerSlot() : 1);
 
         Doctor savedDoctor = doctorRepository.save(doctor);
 
