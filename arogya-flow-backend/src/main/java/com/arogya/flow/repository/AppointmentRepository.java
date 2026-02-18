@@ -8,8 +8,22 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
 
 @Repository
 public interface AppointmentRepository extends JpaRepository<Appointment, Long> {
     long countBySlot_SlotDate(LocalDate slotDate);
+
+    @Query("""
+        SELECT a
+        FROM Appointment a
+        WHERE
+            a.slot.slotDate = :today
+            AND a.slot.startTime > :now
+        ORDER BY a.slot.startTime ASC
+    """)
+    List<Appointment> findUpcomingAppointments(
+            @Param("today") LocalDate today,
+            @Param("now") LocalTime now
+    );
 }
