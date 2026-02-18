@@ -19,9 +19,14 @@ public class AppointmentService {
     private final SlotRepository slotRepository;
     private final AppointmentRepository appointmentRepository;
     private final SlotService slotService;
+    private final EmailService emailService;
 
     @Transactional
     public AppointmentDTO bookSlot(SlotBookingRequestDTO request){
+        if(request.getEmail() == null || request.getEmail().isBlank()){
+            throw new IllegalStateException("Email is required");
+        }
+
         Slot slot = slotRepository.findById(request.getSlotId())
                 .orElseThrow(()->
                             new ResourceNotFoundException("Slot Not Found")
@@ -41,8 +46,15 @@ public class AppointmentService {
         slot.setStatus(SlotStatus.BOOKED);
 
         Appointment saved = appointmentRepository.save(appointment);
-
         slotRepository.save(slot);
+
+        String slotTime = slot.getStartTime() + " to " + slot.getEndTime();
+
+        emailService.sendBookingConfirmation(
+                saved.getEmail(),
+                saved.getPatientName(),
+                slotTime
+        );
 
         return new AppointmentDTO(
                 saved.getId(),

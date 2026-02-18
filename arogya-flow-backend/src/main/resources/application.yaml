@@ -24,3 +24,14 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         jdbc:
           time_zone: Asia/Kolkata
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: mishraaditya6001@gmail.com
+    password: bpofgklnzyjrnous
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true

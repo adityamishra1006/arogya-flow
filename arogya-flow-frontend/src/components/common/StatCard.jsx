@@ -9,6 +9,11 @@ export default function StatCard({ title, value }) {
         return "text-gray-800";
     };
 
+    const isValidNumber =
+        typeof value === "number" && !isNaN(value);
+
+    const safeValue = isValidNumber ? value : 0;
+
     return (
         <div className="
             bg-white rounded-xl shadow-md p-5
@@ -21,17 +26,16 @@ export default function StatCard({ title, value }) {
 
             <p className={`text-3xl font-bold mt-2 ${getColor()}`}>
 
-                {typeof value === "number" ? (
+                {isValidNumber ? (
                     <CountUp
+                        key={safeValue}
                         start={0}
-                        end={value}
-                        duration={value > 50 ? 2 : 1}
-                        enableScrollSpy
-                        scrollSpyDelay={200}
+                        end={safeValue}
+                        duration={safeValue > 50 ? 2 : 1}
                     />
                 ) : (
                     <span className="text-lg font-semibold">
-                        {value}
+                        {value ?? "-"}
                     </span>
                 )}
 
