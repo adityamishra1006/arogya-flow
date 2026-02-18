@@ -5,6 +5,9 @@ spring:
   application:
     name: arogya-flow-backend
 
+  jackson:
+    time-zone: Asia/Kolkata
+
   datasource:
     url: jdbc:postgresql://localhost:5432/arogyaflow
     username: postgres
@@ -19,3 +22,5 @@ spring:
       hibernate:
         format_sql: true
         dialect: org.hibernate.dialect.PostgreSQLDialect
+        jdbc:
+          time_zone: Asia/Kolkata
