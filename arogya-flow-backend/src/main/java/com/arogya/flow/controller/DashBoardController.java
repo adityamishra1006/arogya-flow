@@ -2,6 +2,8 @@ package com.arogya.flow.controller;
 
 
 import com.arogya.flow.dto.DashboardStatsDTO;
+import com.arogya.flow.dto.UpcomingAppointentDTO;
+import com.arogya.flow.entity.Appointment;
 import com.arogya.flow.entity.Slot;
 import com.arogya.flow.entity.enums.SlotStatus;
 import com.arogya.flow.repository.AppointmentRepository;
@@ -17,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -38,6 +41,17 @@ public class DashBoardController{
         long openSlots = slotRepository.countBySlotDateAndStatus(today, SlotStatus.OPEN);
         long todaysBookings = appointmentRepository.countBySlot_SlotDate(today);
 
+        List<Appointment> upcoming = appointmentRepository.findUpcomingAppointments(today, now);
+
+        List<UpcomingAppointentDTO> upcomingDTO =
+                upcoming.stream()
+                        .map(a -> new UpcomingAppointentDTO(
+                                a.getSlot().getStartTime().toString(),
+                                a.getPatientName(),
+                                a.getSlot().getDoctor().getName()
+                        ))
+                        .toList();
+
         Optional<Slot> nextSlot = slotRepository
                 .findFirstBySlotDateAndStatusAndStartTimeAfterOrderByStartTimeAsc(
                         today,
@@ -58,7 +72,8 @@ public class DashBoardController{
                 openSlots,
                 todaysBookings,
                 nextAvailableSlot,
-                todayDate
+                todayDate,
+                upcomingDTO
         );
 
         return ResponseEntity.ok(stats);
