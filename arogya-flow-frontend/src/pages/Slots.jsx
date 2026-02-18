@@ -5,6 +5,7 @@ import { getDoctorsById } from "../api/doctorApi";
 import { bookSlot } from "../api/appointmentApi";
 import SlotCard from "../components/slots/SlotCard";
 import BookSlotModal from "../components/slots/BookSlotModal";
+import toast from "react-hot-toast";
 
 export default function Slots() {
     const { doctorId } = useParams();
@@ -31,6 +32,9 @@ export default function Slots() {
     };
 
     const handleBooking = async (bookingData) => {
+
+        const bookingToast = toast.loading("Booking slot...");
+
         try {
             await bookSlot({
                 slotId: bookingData.slotId,
@@ -38,12 +42,20 @@ export default function Slots() {
                 email: bookingData.email,
             });
 
-            fetchSlots();
-            setSelectedSlot(null);
+            toast.success("Appointment confirmed", {
+                id: bookingToast,
+            });
+
+            fetchSlots();          // refresh slots
+            setSelectedSlot(null); // close modal
 
         } catch (err) {
             console.error(err);
-            alert("Booking failed");
+
+            toast.error(
+                err.response?.data?.message || "Booking failed",
+                { id: bookingToast }
+            );
         }
     };
 

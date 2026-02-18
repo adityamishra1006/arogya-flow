@@ -2,6 +2,7 @@ import {useNavigate, useParams} from "react-router-dom";
 import {useState} from "react";
 import { createSlotsForDoctor } from "../api/slotApi";
 import Button from "../components/common/Button";
+import toast from "react-hot-toast";
 
 
 export default function CreateSlots() {
@@ -25,11 +26,11 @@ export default function CreateSlots() {
     const handleSubmit = async () => {
         try{
             await createSlotsForDoctor(doctorId, form);
-            alert("Slot created!");
+            toast.success("Slot Booked Successfully.");
             navigate(`/doctors/${doctorId}/slots`);
         }catch (err){
             console.error(err);
-            alert("Failed to create slots");
+            toast.error(err.response?.data?.message || "Failed to create Slot");
         }
     };
 

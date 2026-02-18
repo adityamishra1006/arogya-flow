@@ -1,6 +1,7 @@
 import {useState} from "react";
 import Modal from "../common/Modal.jsx";
 import Button from "../common/Button.jsx";
+import toast from "react-hot-toast";
 
 export default function BookSlotModal({ isOpen, onClose, onSubmit, slot }){
     const [patientName, setPatientName] = useState("");
@@ -8,7 +9,7 @@ export default function BookSlotModal({ isOpen, onClose, onSubmit, slot }){
 
     const handleSubmit = () => {
         if (!patientName || !email) {
-            alert("Please enter valid details");
+            toast.error("Please enter valid details");
             return;
         }
 
