@@ -9,9 +9,9 @@ spring:
     time-zone: Asia/Kolkata
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/arogyaflow
-    username: postgres
-    password: "#@Ditya06"
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
 
   jpa:
@@ -24,11 +24,12 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         jdbc:
           time_zone: Asia/Kolkata
+
   mail:
     host: smtp.gmail.com
     port: 587
-    username: mishraaditya6001@gmail.com
-    password: bpofgklnzyjrnous
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
     properties:
       mail:
         smtp:
