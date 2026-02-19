@@ -2,12 +2,9 @@ package com.arogya.flow.service;
 
 import com.arogya.flow.dto.SlotAvailabilityDTO;
 import com.arogya.flow.dto.SlotCreateRequestDTO;
-import com.arogya.flow.dto.SlotDTO;
 import com.arogya.flow.entity.Doctor;
 import com.arogya.flow.entity.Slot;
 import com.arogya.flow.entity.enums.SlotStatus;
-import com.arogya.flow.exception.ResourceNotFoundException;
-import com.arogya.flow.repository.DoctorRepository;
 import com.arogya.flow.repository.SlotRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -16,15 +13,18 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class SlotService{
+public class SlotService {
+
     private final SlotRepository slotRepository;
     private final DoctorService doctorService;
 
+    private static final ZoneId INDIA_ZONE = ZoneId.of("Asia/Kolkata");
 
     @Transactional
     public List<SlotAvailabilityDTO> createSlots(Long doctorId, SlotCreateRequestDTO request) {
@@ -32,7 +32,9 @@ public class SlotService{
         Doctor doctor = doctorService.getDoctorEntity(doctorId);
         validateRequest(request);
 
-        if (request.getSlotDate().isBefore(LocalDate.now())) {
+        LocalDate today = LocalDate.now(INDIA_ZONE);
+
+        if (request.getSlotDate().isBefore(today)) {
             throw new IllegalArgumentException("Cannot create slots for past date");
         }
 
@@ -81,8 +83,8 @@ public class SlotService{
                 .toList();
     }
 
+    public List<SlotAvailabilityDTO> getSlotByDoctorAndDate(Long doctorId, LocalDate date) {
 
-    public List<SlotAvailabilityDTO> getSlotByDoctorAndDate(Long doctorId, LocalDate date){
         List<Slot> slots = slotRepository.findByDoctorIdAndSlotDateOrderByStartTime(
                 doctorId,
                 date
@@ -95,9 +97,10 @@ public class SlotService{
 
     @Scheduled(fixedRate = 60000)
     @Transactional
-    public void closedExpiredSlots(){
-        LocalDate today = LocalDate.now();
-        LocalTime now = LocalTime.now();
+    public void closedExpiredSlots() {
+
+        LocalDate today = LocalDate.now(INDIA_ZONE);
+        LocalTime now = LocalTime.now(INDIA_ZONE);
 
         List<Slot> expiredTime = slotRepository.findByStatusAndSlotDateAndEndTimeBefore(
                 SlotStatus.OPEN,
@@ -105,30 +108,35 @@ public class SlotService{
                 now
         );
 
-        for(Slot slot : expiredTime){
+        for (Slot slot : expiredTime) {
             slot.setStatus(SlotStatus.CLOSED);
         }
+
         slotRepository.saveAll(expiredTime);
     }
 
     @Transactional
-    public void deleteOldCompletedSlots(){
-        LocalDate cutOffDate = LocalDate.now().minusDays(1);
+    public void deleteOldCompletedSlots() {
+
+        LocalDate cutOffDate = LocalDate.now(INDIA_ZONE).minusDays(1);
 
         List<Slot> oldSlots = slotRepository.findByStatusAndSlotDateBefore(
                 SlotStatus.CLOSED,
                 cutOffDate
         );
+
         slotRepository.deleteAll(oldSlots);
     }
 
-    public void resetDailySlots(){
-        LocalDate today = LocalDate.now();
+    public void resetDailySlots() {
+
+        LocalDate today = LocalDate.now(INDIA_ZONE);
+
         List<Slot> oldSlots = slotRepository.findBySlotDateBefore(today);
         slotRepository.deleteAll(oldSlots);
+
         System.out.println("Daily slots reset successfully");
     }
-
 
     private void validateRequest(SlotCreateRequestDTO request) {
 
@@ -151,6 +159,7 @@ public class SlotService{
     }
 
     private SlotAvailabilityDTO mapToAvailabilityDTO(Slot slot) {
+
         int remaining = Math.max(
                 slot.getMaxToken() - slot.getCurrentTokenCount(),
                 0
@@ -158,7 +167,7 @@ public class SlotService{
 
         String patientName = null;
 
-        if(slot.getStatus() == SlotStatus.BOOKED && slot.getAppointment() != null){
+        if (slot.getStatus() == SlotStatus.BOOKED && slot.getAppointment() != null) {
             patientName = slot.getAppointment().getPatientName();
         }
 
